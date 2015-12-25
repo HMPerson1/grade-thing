@@ -3,6 +3,8 @@ import scala.language.implicitConversions
 import com.lynden.gmapsfx.{GoogleMapView, MapComponentInitializedListener}
 import com.lynden.gmapsfx.javascript.`object`._
 
+import scalafx.Includes._
+
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.geometry.{Insets, Pos}
@@ -17,7 +19,6 @@ import scalafx.util.converter.FormatStringConverter
 import java.text.DecimalFormat
 
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction
 import org.apache.commons.math3.analysis.UnivariateFunction
 
 object Main extends JFXApp with MapComponentInitializedListener {
@@ -72,7 +73,16 @@ object Main extends JFXApp with MapComponentInitializedListener {
             children = Seq(
               new Label("Grade:"),
               gradeSpinner,
-              new Button("Go!"))
+              new Button("Go!") {
+                onAction = handle {
+                  // commit any edits to the spinner
+                  val handler = gradeSpinner.editor().onAction()
+                  handler.handle(null)
+                  handler.handle(null)
+
+                  plotGrade(gradeSpinner.value())
+                }
+              })
           },
           new Separator,
           mapPane)
@@ -90,17 +100,26 @@ object Main extends JFXApp with MapComponentInitializedListener {
     mapPane.children = mapAnchor
   }
 
+  def plotGrade(grade: Double): Unit = {
+    val lat = grade2lat(grade)
+    println(s"grade: $grade")
+    println(s"lat: $lat")
+  }
+
   val initialPoints: Array[(Double, Double)] = Array(
-    (100.0, 47.61),
-    ( 94.0, 32.78),
-    ( 93.5, 29.77),
-    ( 93.0, 29.42),
-    ( 92.5, 31.78),
-    ( 89.5, 25.67),
-    ( 82.5, 19.43),
-    ( 79.5, 14.53))
+    (1.000, 47.61),
+    (0.940, 32.78),
+    (0.935, 29.77),
+    (0.930, 29.42),
+    (0.925, 31.78),
+    (0.895, 25.67),
+    (0.825, 19.43),
+    (0.795, 14.53))
+  val maxGrade = initialPoints.unzip._1.max
+  val minGrade = initialPoints.unzip._1.min
 
   val interpFunction: (Double => Double) = (new SplineInterpolator().interpolate _).tupled(initialPoints.sortBy(_._1).unzip)
+  def grade2lat(grade: Double): Double = interpFunction((minGrade max grade) min maxGrade)
 
   implicit class ApacheFunc2Func(apFunc: UnivariateFunction) extends (Double => Double) {
     def apply(v: Double): Double = apFunc.value(v)
