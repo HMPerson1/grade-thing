@@ -105,5 +105,5 @@ object Main extends JFXApp with MapComponentInitializedListener {
   implicit class ApacheFunc2Func(apFunc: UnivariateFunction) extends (Double => Double) {
     def apply(v: Double): Double = apFunc.value(v)
   }
-  implicit def tuple2LatLong[N <% Double](p: (N, N)): LatLong = new LatLong(p._1, p._2)
+  implicit def tuple2LatLong[N](p: (N, N))(implicit ev: N => Double): LatLong = new LatLong(p._1, p._2)
 }
