@@ -7,11 +7,10 @@ import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
-import scalafx.scene.control.{Button, Separator, Spinner}
+import scalafx.scene.control._
 import scalafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory
 import scalafx.scene.layout._
 import scalafx.scene.paint.Color._
-import scalafx.scene.text.Text
 import scalafx.util.StringConverter
 import scalafx.util.converter.FormatStringConverter
 
@@ -26,9 +25,7 @@ object Main extends JFXApp with MapComponentInitializedListener {
   val mapView: GoogleMapView = new GoogleMapView
   mapView.addMapInializedListener(this)
 
-  val mapAnchor = new AnchorPane(mapView) {
-    vgrow = Priority.Always
-  }
+  val mapAnchor = new AnchorPane(mapView)
 
   type JDouble = java.lang.Double
   val gradeSpinner = new Spinner[JDouble]() {
@@ -52,6 +49,16 @@ object Main extends JFXApp with MapComponentInitializedListener {
     }
   }
 
+  val mapPane = new StackPane {
+    vgrow = Priority.Always
+    children = Seq(
+      mapAnchor,
+      new HBox {
+        alignment = Pos.Center
+        children = new ProgressIndicator
+      })
+  }
+
   stage = new PrimaryStage {
     title = "Grade Thing"
     scene = new Scene {
@@ -63,12 +70,12 @@ object Main extends JFXApp with MapComponentInitializedListener {
             alignment = Pos.BaselineLeft
             spacing = 10
             children = Seq(
-              new Text("Grade:"),
+              new Label("Grade:"),
               gradeSpinner,
               new Button("Go!"))
           },
           new Separator,
-          mapAnchor)
+          mapPane)
       }
     }
   }
@@ -80,6 +87,7 @@ object Main extends JFXApp with MapComponentInitializedListener {
       .streetViewControl(false)
       .zoom(3)
     mapView.createMap(mapOptions)
+    mapPane.children = mapAnchor
   }
 
   val initialPoints: Array[(Double, Double)] = Array(
