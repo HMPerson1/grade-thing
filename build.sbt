@@ -12,6 +12,7 @@ lazy val root = (project in file(".")).
     libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-math3" % "3.2",
       "org.scalafx" %% "scalafx" % "8.0.60-R9",
-      "com.lynden" % "GMapsFX" % "1.1.1")
+      "com.lynden" % "GMapsFX" % "1.1.1",
+      "com.github.tototoshi" %% "scala-csv" % "1.2.2")
   )
 
